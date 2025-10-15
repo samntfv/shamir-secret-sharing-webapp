@@ -3,6 +3,8 @@
 A modern, privacy-focused web app that lets you **encrypt sensitive text or files** using **AES-256-GCM** and securely **distribute the encryption key** among trusted parties using **Shamir’s Secret Sharing**.\
 Everything runs **entirely in your browser** — no data is uploaded or stored anywhere.
 
+**Live version**: [here](https://precious-cassata-cd874d.netlify.app/)
+
 ---
 
 ## ✨ Features
