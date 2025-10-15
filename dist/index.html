@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Shamir Secret Sharing</title>
+  <meta name="description" content="Split and recover secrets securely in your browser using Shamir's Secret Sharing. 100% client-side, privacy-first." />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <!-- Content-Security-Policy (prefer setting via HTTP headers in production) -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://cdn.buymeacoffee.com;"> 
+  <!-- Use a modern system font stack; optionally load Inter for nicer UI -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="title">Shamir Secret Sharing</div>
+        <div class="subtitle">Split secrets into shares & recover them locally</div>
+      </div>
+    </header>
+
+    <section class="card" aria-labelledby="create-heading">
+      <h2 id="create-heading">Create shares & encrypt</h2>
+      <div class="small">Enter a secret (text) or select a file. A random AES-256 key encrypts the payload; the key is split using Shamir's scheme.</div>
+
+      <div class="row first">
+        <label for="secretText">Secret (text)</label>
+        <textarea id="secretText" placeholder="Type or paste secret (leave empty when using a file)" aria-label="Secret text"></textarea>
+      </div>
+
+      <div class="row">
+        <label for="secretFile">Or select file</label>
+        <input id="secretFile" type="file" aria-label="File to encrypt" />
+        <div class="muted">Max file: 50 MB</div>
+      </div>
+
+      <div class="row">
+        <label for="sharesCount">Shares</label>
+        <input id="sharesCount" type="number" min="2" max="20" value="3" />
+        <label for="threshold">Threshold</label>
+        <input id="threshold" type="number" min="2" max="20" value="2" />
+        <div class="controls">
+          <button id="createBtn" class="btn btn-primary">Create shares & encrypt</button>
+          <button id="resetCreate" class="btn btn-ghost">Reset</button>
+        </div>
+      </div>
+
+      <div id="createProgress" class="mt-8 display-none">
+        <div class="small">Processing</div>
+        <div class="progress"><b id="createProgressBar"></b></div>
+      </div>
+
+      <div id="createResult" class="mt-14 display-none">
+        <div class="small">Envelope (save this JSON securely). contains ciphertext, IV, and metadata.</div>
+        <pre id="envelopeOut" class="output" aria-live="polite"></pre>
+
+        <div class="mt-10 flex-wrap gap-8">
+          <button id="downloadEnvelopeBtn" class="btn btn-ghost display-none">Download Envelope</button>
+          <button id="downloadAllSharesBtn" class="btn btn-ghost display-none">Download All Shares (ZIP)</button>
+          <button id="copyEnvelopeBtn" class="btn btn-ghost display-none">Copy Envelope</button>
+        </div>
+
+        <div id="sharesContainer" class="shares-grid" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="recover-heading">
+      <h2 id="recover-heading">Recover & decrypt</h2>
+      <div class="small">Upload the envelope JSON and at least the threshold number of share files to reconstruct the AES key and decrypt.</div>
+
+      <div class="row mt-12">
+        <label for="envelopeFile">Envelope JSON</label>
+        <input id="envelopeFile" type="file" accept="application/json" />
+      </div>
+      <div class="row">
+        <label for="shareFiles">Share files</label>
+        <input id="shareFiles" type="file" accept="application/json" multiple />
+        <div class="muted">You may select multiple share JSON files.</div>
+      </div>
+
+      <div class="row">
+        <div class="flex-1"></div>
+        <div class="controls">
+          <button id="recoverBtn" class="btn btn-primary">Reconstruct & decrypt</button>
+          <button id="resetRecover" class="btn btn-ghost">Reset</button>
+        </div>
+      </div>
+
+      <div id="recoverProgress" class="mt-8 display-none">
+        <div class="small">Reconstructing</div>
+        <div class="progress"><b id="recoverProgressBar"></b></div>
+      </div>
+
+      <div id="recoverResult" class="mt-12 display-none">
+        <div class="card">
+          <div class="small">Decryption result</div>
+          <pre id="decryptedOut" class="output" aria-live="polite"></pre>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="muted disclaimer">
+          <strong>Disclaimer:</strong> This tool performs all operations entirely within your browser. No data is transmitted or stored on any server. Use it only on trusted devices and networks. For maximum privacy, consider running it in a private or incognito window with all browser extensions disabled. While every effort has been made to ensure security and correctness, no guarantees or warranties are provided. The authors and maintainers assume no liability for data loss, misuse, or security breaches arising from the use of this tool.
+        </div>
+        <div class="support">
+          🤍 If you find this tool useful, please consider supporting through: <a href="https://buymeacoffee.com/smnfv" target="_blank" rel="noopener noreferrer">
+            <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" class="buymeacoffee-btn">
+          </a>
+        </div>
+      </div>
+    </footer>
+
+    <!-- toast container -->
+    <div id="toast" class="toast display-none"></div>
+  </div>
+<script src="app.js" defer></script>
+</body>
+</html>
